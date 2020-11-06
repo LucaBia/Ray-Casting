@@ -42,7 +42,7 @@ def start_the_game():
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_ESCAPE: 
                     isRunning = False # Menu
-                elif ev.key == pygame.K_w or ev.key == pygame.K_UP:
+                elif ev.key == pygame.K_w or ev.key == pygame.K_UP:                    
                     newX += cos(r.player['angle'] * pi / 180) * r.stepSize
                     newY += sin(r.player['angle'] * pi / 180) * r.stepSize
                 elif ev.key == pygame.K_s or ev.key == pygame.K_DOWN:
@@ -59,12 +59,15 @@ def start_the_game():
                 elif ev.key == pygame.K_e or ev.key == pygame.K_x:
                     r.player['angle'] += 5
 
-                i = int(newX/r.blocksize)
-                j = int(newY/r.blocksize)
-
-                if r.map[j][i] == ' ':
-                    r.player['x'] = newX
-                    r.player['y'] = newY
+            elif ev.type == pygame.MOUSEMOTION:
+                if ev.rel[0] > 0:  # 'rel' is a tuple (x, y). 'rel[0]' is the x-value.
+                    print("Derecha")
+                elif ev.rel[0] < 0:  # 'rel' is a tuple (x, y). 'rel[0]' is the x-value.
+                    print("Izquierda")
+                elif ev.rel[1] > 0:  # pygame start y=0 at the top of the display, so higher y-values are further down.
+                    print("Abajo")
+                elif ev.rel[1] > 0:  # pygame start y=0 at the top of the display, so higher y-values are further down.
+                    print("Arriba")
 
         # Color de fondo
         screen.fill(pygame.Color("gray"))
