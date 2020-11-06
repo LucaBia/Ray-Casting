@@ -1,130 +1,6 @@
 import pygame
-import pygame_menu
-from functools import partial
-from math import cos, sin, pi
+from gl import *
 
-
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-BACKGROUND = (64,64,64)
-
-colors = {
-    '1' : (31,54,61),
-    '2' : (64, 121, 140),
-    '3' : (112, 169, 161)
-}
-
-textures = {
-    '1' : pygame.image.load('Scifi_Wall_Black.jpg'),
-    '2' : pygame.image.load('Scifi_Wall_White.jpg'),
-    '3' : pygame.image.load('Scifi_Wall_Copper.jpg'),
-}
-
-
-
-class Raycaster(object):
-    def __init__(self,screen):
-        self.screen = screen
-        _, _, self.width, self.height = screen.get_rect()
-        self.map = []
-        self.blocksize = 50
-        self.wallHeight = 50
-        self.stepSize = 5
-        # self.setColor(WHITE)
-        self.player = {
-            "x" : 75,
-            "y" : 175,
-            "angle" : 0,
-            "fov" : 60
-            }
-
-    # def setColor(self, color):
-    #     self.blockColor = color
-
-    def load_map(self, filename):
-        with open(filename) as f:
-            for line in f.readlines():
-                self.map.append(list(line))
-
-    def drawRect(self, x, y, tex):
-        tex = pygame.transform.scale(tex, (self.blocksize, self.blocksize))
-        rect = tex.get_rect()
-        rect = rect.move( (x,y) )
-        self.screen.blit(tex, rect)
-
-
-    def drawPlayerIcon(self,color):
-        rect = (int(self.player['x'] - 2), int(self.player['y'] - 2), 5, 5)
-        self.screen.fill(color, rect)
-
-    def castRay(self, a):
-        rads = a * pi / 180
-        dist = 0
-        while True:
-            x = int(self.player['x'] + dist * cos(rads))
-            y = int(self.player['y'] + dist * sin(rads))
-
-            i = int(x/self.blocksize)
-            j = int(y/self.blocksize)
-
-            if self.map[j][i] != ' ':
-                hitX = x - i*self.blocksize
-                hitY = y - j*self.blocksize
-
-                if 1 < hitX < self.blocksize - 1:
-                    maxHit = hitX
-                else:
-                    maxHit = hitY
-
-                tx = maxHit / self.blocksize
-                
-                return dist, self.map[j][i], tx
-
-            self.screen.set_at((x,y), WHITE)
-
-            # dist += 5
-            dist += 2
-
-    def render(self):
-
-        halfWidth = int(self.width/2)
-        halfHeight = int(self.height/2)
-
-        for x in range(0, halfWidth, self.blocksize):
-            for y in range(0, self.height, self.blocksize):
-                
-                i = int(x/self.blocksize)
-                j = int(y/self.blocksize)
-
-                if self.map[j][i] != ' ':
-                    self.drawRect(x, y, textures[self.map[j][i]])
-
-        self.drawPlayerIcon(BLACK)
-
-        for i in range(halfWidth):
-            angle = self.player['angle'] - self.player['fov']/2 + self.player['fov'] * i/halfWidth
-            dist, wallType, tx = self.castRay(angle)
-
-            x = halfWidth + i 
-
-            h = self.height / (dist * cos( (angle - self.player['angle']) * pi / 180 )) * self.wallHeight
-
-            start = int( halfHeight - h/2)
-            end = int( halfHeight + h/2)
-
-            img = textures[wallType]
-            tx = int(tx * img.get_width())
-
-            for y in range(start, end):
-                ty = (y - start)/(end - start)
-                ty = int(ty * img.get_height())
-                texColor = img.get_at((tx, ty))
-                self.screen.set_at((x, y), texColor)
-
-        for i in range(self.height):
-            self.screen.set_at( (halfWidth, i), BLACK)
-            self.screen.set_at( (halfWidth+1, i), BLACK)
-            self.screen.set_at( (halfWidth-1, i), BLACK)
 
 
 def updateFPS():
@@ -147,6 +23,12 @@ r = Raycaster(screen)
 # r.setColor( (128,0,0) )
 r.load_map('map.txt')
 
+# Reproducción de música
+pygame.mixer.init()
+pygame.mixer.music.load('media/soundtrack.mp3')
+pygame.mixer.music.play()
+
+
 def start_the_game():
     isRunning = True
     while isRunning:
@@ -158,9 +40,8 @@ def start_the_game():
             newY = r.player['y']
 
             if ev.type == pygame.KEYDOWN:
-                if ev.key == pygame.K_ESCAPE:
-                    # Cierra el juego
-                    isRunning = False
+                if ev.key == pygame.K_ESCAPE: 
+                    isRunning = False # Menu
                 elif ev.key == pygame.K_w or ev.key == pygame.K_UP:
                     newX += cos(r.player['angle'] * pi / 180) * r.stepSize
                     newY += sin(r.player['angle'] * pi / 180) * r.stepSize
@@ -185,10 +66,11 @@ def start_the_game():
                     r.player['x'] = newX
                     r.player['y'] = newY
 
-        # Color del suelo
+        # Color de fondo
         screen.fill(pygame.Color("gray"))
         # Color del cielo
         screen.fill(pygame.Color(154, 202, 231), (int(r.width / 2), 0, int(r.width / 2),int(r.height / 2)))
+        # Color del suelo
         screen.fill(pygame.Color("dimgray"), (int(r.width / 2), int(r.height / 2), int(r.width / 2),int(r.height / 2)))
 
         r.render()
@@ -201,7 +83,7 @@ def start_the_game():
 
 # https://pygame-menu.readthedocs.io/en/latest/_source/widgets_image.html
 background_image = pygame_menu.baseimage.BaseImage(
-    image_path = 'background.jpg',
+    image_path = 'media/menu/background.jpg',
     drawing_mode = pygame_menu.baseimage.IMAGE_MODE_FILL,
 )
 
@@ -222,7 +104,7 @@ menu = pygame_menu.Menu(400, 600,
                         theme = mytheme)
 menu.add_button('Jugar', start_the_game)
 menu.add_button('Salir', pygame_menu.events.EXIT)
-menu.add_image('HP_logo.png', scale=(0.5, 0.5))
+menu.add_image('media/menu/HP_logo.png', scale=(0.5, 0.5))
 paint_background(screen)
 # menu.mainloop(screen)
 menu.mainloop(surface=screen,
