@@ -71,21 +71,17 @@ class Raycaster(object):
         self.screen.fill(color, rect)
 
     def drawSprite(self, sprite, size):
-        # Pitagoras
         spriteDist = ((self.player['x'] - sprite['x'])**2 + (self.player['y'] - sprite['y'])**2) ** 0.5
-        
-        # Angulo entre el personaje y el sprite, arco tangente 2
+
         spriteAngle = atan2(sprite['y'] - self.player['y'], sprite['x'] - self.player['x'])
 
         aspectRatio = sprite["texture"].get_width() / sprite["texture"].get_height()
         spriteHeight = (self.height / spriteDist) * size
         spriteWidth = spriteHeight * aspectRatio
 
-        #Convertir a radianes
         angleRads = self.player['angle'] * pi / 180
         fovRads = self.player['fov'] * pi / 180
 
-        #Buscamos el punto inicial para dibujar el sprite
         startX = (self.width * 3 / 4) + (spriteAngle - angleRads)*(self.width/2) / fovRads - (spriteWidth/2)
         startY = (self.height / 2) - (spriteHeight / 2)
         startX = int(startX)
