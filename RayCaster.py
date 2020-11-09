@@ -1,7 +1,5 @@
 import pygame
-import math
 from gl import *
-
 
 
 def updateFPS():
@@ -22,12 +20,12 @@ font = pygame.font.SysFont("Arial", 30)
 
 r = Raycaster(screen)
 # r.setColor( (128,0,0) )
-r.load_map('map.txt')
+r.load_map('map0.txt')
 
 # Reproducción de música
-# pygame.mixer.init()
-# pygame.mixer.music.load('media/soundtrack.mp3')
-# pygame.mixer.music.play()
+pygame.mixer.init()
+pygame.mixer.music.load('media/soundtrack.mp3')
+pygame.mixer.music.play()
 
 
 def start_the_game():
@@ -41,14 +39,14 @@ def start_the_game():
             newY = r.player['y']
 
             if ev.type == pygame.KEYDOWN:
-                if ev.key == pygame.K_ESCAPE: 
+                if ev.key == pygame.K_ESCAPE:
                     isRunning = False # Menu
-                elif ev.key == pygame.K_w or ev.key == pygame.K_UP:               
+                elif ev.key == pygame.K_w or ev.key == pygame.K_UP:
                     newX += cos(r.player['angle'] * pi / 180) * r.stepSize
                     newY += sin(r.player['angle'] * pi / 180) * r.stepSize
                 elif ev.key == pygame.K_s or ev.key == pygame.K_DOWN:
                     newX -= cos(r.player['angle'] * pi / 180) * r.stepSize
-                    newY -= sin(r.player['angle'] * pi / 180) * r.stepSize 
+                    newY -= sin(r.player['angle'] * pi / 180) * r.stepSize
                 elif ev.key == pygame.K_a or ev.key == pygame.K_LEFT:
                     newX -= cos((r.player['angle'] + 90) * pi / 180) * r.stepSize
                     newY -= sin((r.player['angle'] + 90) * pi / 180) * r.stepSize
@@ -74,23 +72,16 @@ def start_the_game():
                     r.player["angle"] += 10
 
             elif ev.type == pygame.MOUSEMOTION:
-                if ev.rel[0] > 0:  # 'rel' is a tuple (x, y). 'rel[0]' is the x-value.
-                    print("Derecha")
-                elif ev.rel[0] < 0:  # 'rel' is a tuple (x, y). 'rel[0]' is the x-value.
-                    print("Izquierda")
-                elif ev.rel[1] > 0:  # pygame start y=0 at the top of the display, so higher y-values are further down.
-                    print("Abajo")
-                elif ev.rel[1] < 0:  # pygame start y=0 at the top of the display, so higher y-values are further down.
-                    print("Arriba")
                 mouse = pygame.mouse.get_pos()
                 print(mouse)
                 mouseX = mouse[0]
                 mouseY = mouse[1]
-                relX = mouseX - newX
-                relY = mouseY - newY
-                angle = (180/math.pi) * -math.atan2(mouseX, mouseY)
-                r.player['angle'] = angle
+                posX = r.player['x']
+                posY = r.player['y']
+                angle = (180/pi) * -atan2(mouseX - posX , mouseY - posY) + 90
+                r.player['angle'] =  angle
 
+        pygame.event.pump()
 
 
         # Color de fondo
@@ -105,7 +96,7 @@ def start_the_game():
         screen.fill(pygame.Color("black"), (0,0,30,30))
         screen.blit(updateFPS(), (0,0))
         clock.tick(30)
-        
+
         pygame.display.update()
 
 # https://pygame-menu.readthedocs.io/en/latest/_source/widgets_image.html
@@ -126,8 +117,8 @@ mytheme = Theme(background_color = background_image,
                 widget_alignment = pygame_menu.locals.ALIGN_CENTER,
                 title_offset = (190, 0))
 
-menu = pygame_menu.Menu(400, 600, 
-                        title = 'Harry Potter', 
+menu = pygame_menu.Menu(400, 600,
+                        title = 'Harry Potter',
                         theme = mytheme)
 menu.add_button('Jugar', start_the_game)
 menu.add_button('Salir', pygame_menu.events.EXIT)

@@ -13,7 +13,11 @@ SPRITE_BACKGROUND = (152, 0, 136, 255)
 textures = {
     '1' : pygame.image.load('media/game/wall.png'),
     '2' : pygame.image.load('media/game/wallFrames2.png'),
-    '3' : pygame.image.load('media/game/devilWall.png'),
+    '3' : pygame.image.load('media/game/stoneWall.png'),
+    '4' : pygame.image.load('media/game/wall2.png'),
+    '5' : pygame.image.load('media/game/wall3.png'),
+    '6' : pygame.image.load('media/game/wall4.png'),
+    '7' : pygame.image.load('media/game/wallFrames.png'),
 }
 
 enemies = [
@@ -23,16 +27,34 @@ enemies = [
         "texture" : pygame.image.load('media/game/enemy1.png')
     },
     {
-        "x": 270,
-        "y": 200,
+        "x": 400,
+        "y": 80,
         "texture" : pygame.image.load('media/game/enemy2.png')
     },
     {
-        "x": 270,
-        "y": 420,
+        "x": 250,
+        "y": 370,
         "texture" : pygame.image.load('media/game/enemy3.png')   
     }    
 ]
+
+gemas = {
+    0: {
+        "x": 400,
+        "y": 410,
+        "texture" : pygame.image.load('media/game/glow1.png')
+    },
+    1: {
+        "x": 60,
+        "y": 75,
+        "texture" : pygame.image.load('media/game/glow2.png')
+    },
+    2: {
+        "x": 95,
+        "y": 320,
+        "texture" : pygame.image.load('media/game/glow3.png')
+    }
+ }
 
 
 class Raycaster(object):
@@ -50,11 +72,14 @@ class Raycaster(object):
             "angle" : 0,
             "fov" : 60
         }
+        self.curr_level = 0
+        self.curr_gema = None
 
     # def setColor(self, color):
     #     self.blockColor = color
 
     def load_map(self, filename):
+        self.map = []
         with open(filename) as f:
             for line in f.readlines():
                 self.map.append(list(line))
@@ -167,6 +192,15 @@ class Raycaster(object):
         for enemy in enemies:
             self.screen.fill(pygame.Color("black"), (enemy['x'], enemy['y'], 3,3))
             self.drawSprite(enemy, 30)
+
+        self.curr_gema = gemas[self.curr_level]
+        if (int(self.curr_gema['x']) in range(int(self.player['x'] - 5), int(self.player['x'] + 5))) and (int(self.curr_gema['y']) in range(int(self.player['y'] - 5), int(self.player['y'] + 5))):
+            self.curr_level += 1
+            self.curr_gema = gemas[self.curr_level]
+            self.load_map('map{}.txt'.format(self.curr_level))
+        
+        self.screen.fill(pygame.Color("red"), (self.curr_gema['x'], self.curr_gema['y'], 5, 5))
+        self.drawSprite(self.curr_gema, 15)
 
         for i in range(self.height):
             self.screen.set_at( (halfWidth, i), BLACK)
